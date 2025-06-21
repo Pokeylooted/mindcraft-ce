@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Join Mindcraft Compute Pool</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Join the Mindcraft Compute Pool</h1>
+        <p>Offer your local Ollama models to the community.</p>
+
+        <div class="config-section">
+            <h2>Configuration</h2>
+            <label for="ollama-api-url">Ollama API URL (e.g., http://localhost:11434):</label>
+            <input type="text" id="ollama-api-url" value="http://localhost:11434">
+
+            <button id="fetch-models-btn">Fetch My Models</button>
+        </div>
+
+        <div class="models-section">
+            <h2>Available Models</h2>
+            <div id="models-list">
+                <!-- Models will be listed here -->
+            </div>
+            <p id="models-status"></p>
+        </div>
+
+        <div class="share-section">
+            <h2>Share Selected Models</h2>
+            <label for="gpu-info">GPU Info (e.g., NVIDIA RTX 3080):</label>
+            <input type="text" id="gpu-info" placeholder="Optional">
+            <label for="vram-gb">VRAM (GB):</label>
+            <input type="number" id="vram-gb" placeholder="Optional, e.g., 8">
+            <label for="max-clients">Max Concurrent Clients (default auto):</label>
+            <input type="number" id="max-clients" placeholder="Optional">
+
+            <button id="join-pool-btn">Join Pool</button>
+            <p id="join-status"></p>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

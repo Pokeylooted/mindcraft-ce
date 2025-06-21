@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mindcraft Community AI</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>Welcome to Mindcraft Community AI</h1>
+        <p>Access powerful AI models, powered by the community.</p>
+    </header>
+
+    <main>
+        <section id="available-models">
+            <h2>Available Models in the Community Pool</h2>
+            <div id="models-grid">
+                <!-- Models will be dynamically loaded here -->
+                <p id="loading-models">Loading available models...</p>
+            </div>
+        </section>
+
+        <section id="how-it-works">
+            <h2>How It Works</h2>
+            <p>Mindcraft Community AI connects users seeking AI completions with individuals and groups generously sharing their compute resources. Our intelligent routing ensures your requests are handled efficiently.</p>
+            <p>Want to contribute? You can run our client application to add your local Ollama models to the pool and help power the community!</p>
+            <!-- Link to client UI download/guide will go here eventually -->
+        </section>
+
+        <section id="api-access">
+            <h2>API Access</h2>
+            <p>To use the models, send a POST request to <code>https://mindcraft.riqvip.dev/completions</code> with a JSON payload like:</p>
+            <pre><code>
+{
+  "model": "model_name:tag", // e.g., "llama3:8b"
+  "prompt": "Your text prompt here...",
+  "stream": false // Optional, true for streaming
+}
+            </code></pre>
+            <p>The <code>model_name:tag</code> should be one of the models listed above. If a specific tag (e.g., <code>:8b-q4_K_M</code>) is not available, the system will try to match the base model name (e.g., <code>llama3</code>).</p>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 Mindcraft.riqvip.dev - Community Powered AI</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
