@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mindcraft Compute Dashboard</title>
+    <link rel="icon" href="/media/favicon.ico" type="image/x-icon">
+    <style>
+        /* Basic styling will go here */
+        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background-color: #f4f4f4; color: #333; }
+        header { background-color: #333; color: #fff; padding: 10px 0; text-align: center; margin-bottom: 20px; }
+        h1 { margin: 0; }
+        h2 { border-bottom: 2px solid #333; padding-bottom: 5px; }
+        .container { max-width: 1200px; margin: auto; background-color: #fff; padding: 20px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        .provider, .model-summary-item { background-color: #eee; padding: 15px; margin-bottom: 15px; border-radius: 5px; }
+        .provider h3, .model-summary-item h3 { margin-top: 0; }
+        .model-list li { background-color: #fff; padding: 5px; margin-top: 5px; border-radius: 3px; }
+        #totalProviders { font-weight: bold; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Mindcraft Compute Dashboard</h1>
+    </header>
+    <div class="container">
+        <h2>Active Compute Providers (<span id="totalProviders">0</span>)</h2>
+        <div id="providersList">
+            <p>Loading providers...</p>
+        </div>
+
+        <h2>All Available Models</h2>
+        <div id="modelsList">
+            <p>Loading models...</p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const providersListDiv = document.getElementById('providersList');
+            const modelsListDiv = document.getElementById('modelsList');
+            const totalProvidersSpan = document.getElementById('totalProviders');
+
+            async function fetchData() {
+                try {
+                    const [providersResponse, modelsResponse] = await Promise.all([
+                        fetch('/api/providers'),
+                        fetch('/api/models')
+                    ]);
+
+                    if (!providersResponse.ok || !modelsResponse.ok) {
+                        throw new Error('Failed to fetch data from server.');
+                    }
+
+                    const providers = await providersResponse.json();
+                    const uniqueModels = await modelsResponse.json();
+
+                    renderProviders(providers);
+                    renderModels(uniqueModels);
+
+                } catch (error) {
+                    console.error('Error fetching or rendering data:', error);
+                    providersListDiv.innerHTML = '<p style="color: red;">Error loading provider data. Please try refreshing.</p>';
+                    modelsListDiv.innerHTML = '<p style="color: red;">Error loading model data. Please try refreshing.</p>';
+                }
+            }
+
+            function renderProviders(providers) {
+                if (!providers || providers.length === 0) {
+                    providersListDiv.innerHTML = '<p>No compute providers are currently registered.</p>';
+                    totalProvidersSpan.textContent = '0';
+                    return;
+                }
+
+                totalProvidersSpan.textContent = providers.length;
+                let providersHtml = '';
+                providers.forEach(provider => {
+                    providersHtml += `
+                        <div class="provider">
+                            <h3>Provider: ${escapeHtml(provider.ip)}</h3>
+                            <p><strong>Status:</strong> ${provider.current_load < provider.max_clients ? 'Available' : 'At Capacity'}</p>
+                            <p><strong>Load:</strong> ${provider.current_load} / ${provider.max_clients} clients</p>
+                            <p><strong>Avg. TPS:</strong> ${provider.avg_tps ? provider.avg_tps.toFixed(2) : 'N/A'}</p>
+                            <h4>Models Offered:</h4>
+                            ${renderModelList(provider.models)}
+                        </div>
+                    `;
+                });
+                providersListDiv.innerHTML = providersHtml;
+            }
+
+            function renderModelList(models) {
+                if (!models || models.length === 0) {
+                    return '<p>No models listed by this provider.</p>';
+                }
+                let listHtml = '<ul class="model-list">';
+                models.forEach(model => {
+                    listHtml += `
+                        <li>
+                            <strong>${escapeHtml(model.name)}</strong> (ID: ${escapeHtml(model.id)})
+                            <ul>
+                                <li>Quantization: ${escapeHtml(model.quantization)}</li>
+                                <li>Context: ${model.context_length} tokens</li>
+                                <li>Release Date: ${new Date(model.release_date).toLocaleDateString()}</li>
+                            </ul>
+                        </li>
+                    `;
+                });
+                listHtml += '</ul>';
+                return listHtml;
+            }
+
+            function renderModels(uniqueModels) {
+                if (!uniqueModels || uniqueModels.length === 0) {
+                    modelsListDiv.innerHTML = '<p>No models are currently available across the network.</p>';
+                    return;
+                }
+
+                let modelsHtml = '';
+                uniqueModels.sort((a,b) => a.name.localeCompare(b.name)).forEach(model => {
+                    modelsHtml += `
+                        <div class="model-summary-item">
+                            <h3>${escapeHtml(model.name)}</h3>
+                            <p><strong>Quantization:</strong> ${escapeHtml(model.quantization)}</p>
+                            <p><strong>Context Length:</strong> ${model.context_length} tokens</p>
+                            <p><strong>Release Date:</strong> ${new Date(model.release_date).toLocaleDateString()}</p>
+                            <p><strong>Hosted by:</strong> ${model.providers.length} provider(s) (${escapeHtml(model.providers.join(', '))})</p>
+                        </div>
+                    `;
+                });
+                modelsListDiv.innerHTML = modelsHtml;
+            }
+
+            function escapeHtml(unsafe) {
+                if (unsafe === null || unsafe === undefined) return '';
+                return String(unsafe)
+                     .replace(/&/g, "&amp;")
+                     .replace(/</g, "&lt;")
+                     .replace(/>/g, "&gt;")
+                     .replace(/"/g, "&quot;")
+                     .replace(/'/g, "&#039;");
+            }
+
+            fetchData(); // Initial fetch
+        });
+    </script>
+</body>
+</html>
